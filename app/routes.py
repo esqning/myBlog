@@ -1,8 +1,9 @@
 from app import app
-from flask import render_template, flash, redirect, url_for
+from flask import render_template, flash, redirect, url_for, request
 from app.forms import LoginFrom
 from flask_login import current_user, login_user, logout_user, login_required
 from app.model import User
+from werkzeug.urls import url_parse
 
 
 @app.route('/')
@@ -35,7 +36,12 @@ def login():
         else:
             login_user(user, form.remember_me.data)
 
-        return redirect(url_for('index'))
+        # 重定向到登录页面
+        next_page = request.args.get('next')
+        if not next_page or url_parse(next_page).netloc != '':
+            next_page = url_for('index')
+        return redirect(next_page)
+
     return render_template('login.html', title='login', form=form)
 
 
